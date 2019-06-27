@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<screen-config xmlns="http://schemas.haulmont.com/cuba/screens.xsd">
+
+    <screen id="testcamera_Camera.browse" template="com/company/testcamera/web/camera/camera-browse.xml"/>
+    <screen id="testcamera_Camera.edit" template="com/company/testcamera/web/camera/camera-edit.xml"/>
+</screen-config>

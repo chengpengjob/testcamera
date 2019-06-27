@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        caption="msg://browseCaption"
+        class="com.company.testcamera.web.camera.CameraBrowse"
+        focusComponent="camerasTable"
+        lookupComponent="camerasTable"
+        messagesPack="com.company.testcamera.web.camera">
+    <dsContext>
+        <groupDatasource id="camerasDs"
+                         class="com.company.testcamera.entity.Camera"
+                         view="_local">
+            <query>
+                <![CDATA[select e from testcamera_Camera e order by e.cameraId asc]]>
+            </query>
+        </groupDatasource>
+    </dsContext>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="camerasTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="camerasTable"
+                datasource="camerasDs">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="camerasTable"
+                    width="100%">
+            <actions>
+                <action id="create"
+                        openType="NEW_TAB"/>
+                <action id="edit"
+                        openType="NEW_TAB"/>
+                <action id="remove"
+                        openType="NEW_TAB"/>
+            </actions>
+            <columns>
+                <column id="cameraId"/>
+                <column id="cameraNumber"/>
+                <column id="cameraAddress"/>
+                <column id="account"/>
+                <column id="password"/>
+                <column id="videoAddress"/>
+                <column id="thumbnailAddress"/>
+            </columns>
+            <rows datasource="camerasDs"/>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="camerasTable.create"/>
+                <button id="editBtn" action="camerasTable.edit"/>
+                <button id="removeBtn" action="camerasTable.remove"/>
+               <!-- <button id="viewBtn" caption="查看"/>-->
+                <button id="viewBtn" caption="生成地址"/>
+               <!--<button id="watchBtn" caption="播放"/>-->
+                <button id="closeBtn" caption="关闭"/>
+               <link caption="播放"  id="watchBtn"  target="_blank"/>
+               <!-- <button id="closeBtn" caption="关闭"/>-->
+            </buttonsPanel>
+        </groupTable>
+    </layout>
+</window>
