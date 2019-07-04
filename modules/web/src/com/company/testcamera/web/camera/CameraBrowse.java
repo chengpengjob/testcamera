@@ -191,7 +191,7 @@ public class CameraBrowse extends AbstractLookup {
 
     }
 
-    class SyncPipe extends Thread {
+    /*class SyncPipe extends Thread {
 
         String rtsp = null;
         Process p = null;
@@ -248,7 +248,7 @@ public class CameraBrowse extends AbstractLookup {
             connectToCamera();
         }
 
-    }
+    }*/
 
     class StopProcess extends Thread {
         SyncPipe s = null;
