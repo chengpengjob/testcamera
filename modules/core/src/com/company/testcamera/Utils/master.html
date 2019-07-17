@@ -1,56 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset=utf-8 />
-<title>live-camera</title>
+  <meta charset=utf-8 />
+  <title>live-camera</title>
   <link href="http://localhost:8080/HLS-demo/css/video.css" rel="stylesheet">
   <script src="http://localhost:8080/HLS-demo/js/video.js"></script>
   <script src="http://localhost:8080/HLS-demo/js/videojs-http-streaming.js"></script>
-  
+
   <script src="http://localhost:8080/HLS-demo/js/jquery.min.js"></script>
 </head>
 <body>
-  <video id="my_video_1" class="video-js vjs-default-skin" controls preload="auto" width="800" height="450" 
-  >
-  </video>
+<video id="my_video_1" class="video-js vjs-default-skin" controls preload="auto" width="800" height="450"
+>
+</video>
 
-  <script>
-    var cameraId;
-    $(function(){
-      cameraId= window.location.href.split("=")[1];
-      var src = "m3u8/Gear"+cameraId+"/playlist.m3u8";
-      var myPlayer = videojs("my_video_1", {}, function(){
+<script>
+  var cameraNumber;
+  $(function(){
+    cameraNumber= window.location.href.split("=")[1];
+    var src = "m3u8/Gear"+cameraNumber+"/playlist.m3u8";
+    var myPlayer = videojs("my_video_1", {}, function(){
 
       var obj  = this;
       obj.src({type:"application/x-mpegURL",src:src});
       obj.load();
-      });
-      //加载完后直接播放
-      myPlayer.play();
-    $(window).unbind('beforeunload');
+    });
+    //加载完后直接播放
+    myPlayer.play();
+    //$(window).unbind('beforeunload');
     $(window).bind('beforeunload',function(){
       if(myPlayer != null)
-        myPlayer.dispose();	
-        teardowns();
+        myPlayer.dispose();
+      teardowns();
       //console.warn("Closing");
-      return "Closing the Player";
+      //return "Closing the Player";
 
-	   });
+    });
 
     //function teardown(){
-	  //window.open("http://localhost:8080/app/rest/controller/camera/1/teardown", "_blank");
+    //window.open("http://localhost:8080/app/rest/controller/camera/1/teardown", "_blank");
     //}
-	
-	function teardowns(){
+
+    function teardowns(){
       $.ajax({
-        url: "http://localhost:8080/app/rest/controller/camera/" + cameraId + "/teardown",
+        url: "http://localhost:8080/app/rest/controller/camera/" + cameraNumber + "/teardown",
         type: 'GET'
-        });
+      });
     }
 
   });
 
-  </script>
-  
+</script>
+
 </body>
 </html>

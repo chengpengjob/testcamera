@@ -1,60 +1,66 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>Minitor Camera</title>
-        <style>
-            body { font-size:12px; 
-					background-color:black;}
-            .loading {
-                      position:absolute;
-                      top:50%;left:50%;bottom: 0;right: 0;
-                      width:300px;height:300px;overflow:hidden;z-index:2;
-                      background: url(gif/wait.gif)  no-repeat center center;
-                      margin-top:-150px;margin-left:-150px;margin-right: 0;margin-bottom: 0;}
-        </style>
-    </head>
-    <body>
-        <!-- html 代码 -->
-        <div class="loading"></div>
-        <!--<img src="gif/wait.gif" width="243" height="67" alt=""/>-->
-        <!--<p>很多网站都有这样的一种特效，在页面加载时，先显示一幅图片，当页面加载完成后，图片隐藏，显示页面内容。比如一些网站在页面加载时，会显示一张宣传性的图片，以吸引用户的注意，当页面内容加载完成后，再隐藏这张图片，显示网页的内容。</p>-->
-        <script src="http://localhost:8080/HLS-demo/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
-        <script type="text/javascript">
-            /*
-             * 浏览器在解析 HTML 时,是从上往下解析执行的,因此为了实现页面加载时显示图片,
-             * 只需要在页面的 body 开头部分放一个图片，然后在 body 结束或 jQuery 的页面
-             * 就绪事件中隐藏这个图片,就可以达到这个效果。
-             */
-            /*$(function(){
-                $('.loading').fadeOut();
-            });*/
-			
-			var cameraId;
-		$(function(){	
-			var hrefs = window.location.href.split("=");
-			cameraId = hrefs[1];
+<head>
+    <meta charset="utf-8" />
+    <title>Minitor Camera</title>
+    <style>
+        body { font-size:12px;
+            background-color:black;}
+        .loading {
+            position:absolute;
+            top:50%;left:50%;bottom: 0;right: 0;
+            width:300px;height:300px;overflow:hidden;z-index:2;
+            background: url(gif/wait.gif)  no-repeat center center;
+            margin-top:-150px;margin-left:-150px;margin-right: 0;margin-bottom: 0;}
+    </style>
+</head>
+<body>
+<!-- html 代码 -->
+<div class="loading"></div>
+<!--<img src="gif/wait.gif" width="243" height="67" alt=""/>-->
+<!--<p>很多网站都有这样的一种特效，在页面加载时，先显示一幅图片，当页面加载完成后，图片隐藏，显示页面内容。比如一些网站在页面加载时，会显示一张宣传性的图片，以吸引用户的注意，当页面内容加载完成后，再隐藏这张图片，显示网页的内容。</p>-->
+<script src="http://localhost:8080/HLS-demo/js/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    /*
+     * 浏览器在解析 HTML 时,是从上往下解析执行的,因此为了实现页面加载时显示图片,
+     * 只需要在页面的 body 开头部分放一个图片，然后在 body 结束或 jQuery 的页面
+     * 就绪事件中隐藏这个图片,就可以达到这个效果。
+     */
+    /*$(function(){
+        $('.loading').fadeOut();
+    });*/
 
-			var reqUrl= "http://localhost:8080/app/rest/controller/camera/" + cameraId + "/setup";
-			$.ajax({
-				url: reqUrl,
-				type: 'GET',
-			// 	dataType:'jsonp',
-         //success:function(result){
-          //console.log(result.success)
-       // },
-   //      error:function(result){
-   //        console.log(result.msg)
-   //      }
-				});
-      // fetch(reqUrl,{methd:'GET',mode: 'no-cors'}).then(data => console.log(data));
+    var cameraNumber;
+    $(function(){
+        var hrefs = window.location.href.split("=");
+        cameraNumber = hrefs[1];
 
-			});
-			
-			setTimeout(function(){
-				$('.loading').fadeOut();
-				window.location.href ="master.html?cameraId=" +cameraId;
-			},18000+Math.ceil( Math.random()*2000));
-        </script>
-    </body>
+        var reqUrl= "http://localhost:8080/app/rest/controller/camera/" + cameraNumber + "/setup";
+        $.ajax({
+            url: reqUrl,
+            type: 'GET',
+            // 	dataType:'jsonp',
+            success:function(result){
+
+                if(result == 1){
+                    setTimeout(function(){
+                        $('.loading').fadeOut();
+                        window.location.href ="master.html?cameraNumber=" +cameraNumber;
+                    },18000+Math.ceil( Math.random()*2000));
+                }else{
+                    $('.loading').fadeOut();
+                    window.location.href ="master.html?cameraNumber=" +cameraNumber;
+                }
+            },
+            //      error:function(result){
+            //        console.log(result.msg)
+            //      }
+        });
+        // fetch(reqUrl,{methd:'GET',mode: 'no-cors'}).then(data => console.log(data));
+
+    });
+
+
+</script>
+</body>
 </html>
