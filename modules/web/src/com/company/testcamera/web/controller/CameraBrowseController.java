@@ -50,56 +50,130 @@ public class CameraBrowseController {
     final SecurityContext securityContext = AppContext.getSecurityContext();
 
     ExecutorService executorService = Executors.newFixedThreadPool(5);
-    /*@Autowired
-    public CameraBrowseController(CameraService cameraService) {
-        this.cameraService = cameraService;
-    }*/
 
-    @GetMapping("/camera/{id}/teardown")
-    public void teardownCamById(@PathVariable Integer id) {
-        if (MidleCount.reduce(id) == 0) {
-            SyncPipe syncPipe = (SyncPipe) MidleMap.getnum(id);
-            syncPipe.cancel();
+    static boolean ffpegStatus = false;
+
+    @GetMapping("/camera/{cameraNumber}/teardown")
+    public void teardownCamById(@PathVariable String cameraNumber) {
+
+        Configuration configuration = AppBeans.get(Configuration.class);
+        WebAuthConfig webAuthConfig = configuration.getConfig(WebAuthConfig.class);
+        LoginService loginService = AppBeans.get(LoginService.class);
+        UserSession userSession = loginService.getSystemSession(webAuthConfig.getTrustedClientPassword());
+        try {
+            AppContext.setSecurityContext(new SecurityContext(userSession));
+            Camera camera = cameraService.getCameraByNumber(cameraNumber);
+            int id = camera.getCameraId();
+            int p = MidleCount.reduce(id);
+
+            if (p == 0) {
+                ffpegStatus = false;
+                SyncPipe syncPipe = (SyncPipe) MidleMap.getnum(id);
+                syncPipe.cancel();
+
+
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        String fileDir = "F:/testcamera/deploy/tomcat/webapps";
+                        //String fileDir = "C:/Program Files/Tomcat/apache-tomcat-8.5.39/webapps";
+                        File videoAddress = new File(fileDir + "/HLS-demo/m3u8/Gear" + cameraNumber);
+
+                        String[] files = videoAddress.list();
+                        for (String fileName : files) {
+                            File deleteTs = new File(videoAddress.getAbsolutePath(), fileName);
+                            try {
+                                Files.deleteIfExists(deleteTs.toPath());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+                thread.start();
+               /* File file = new File(videoAddress.getAbsolutePath());
+                File[] listFiles = file.listFiles();
+                if(listFiles.length > 0){
+                    String[] filess = videoAddress.list();
+                    for (String fileName : filess) {
+                        File deleteTs = new File(videoAddress.getAbsolutePath(), fileName);
+                        try {
+                            Files.deleteIfExists(deleteTs.toPath());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }*/
+
+            }
+
+        } finally {
+            AppContext.setSecurityContext(null);
         }
-        /*SyncPipe syncPipe = (SyncPipe) MidleMap.getnum(id);
-        syncPipe.cancel();*/
+       /* if (MidleCount.reduce(id) == 0) {
+            SyncPipe syncPipe = (SyncPipe) MidleMap.getnum(id);
+            try {
+                syncPipe.sleep(8000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            syncPipe.cancel();
+
+            String fileDir = "F:/testcamera/deploy/tomcat/webapps";
+            //String fileDir = "C:/Program Files/Tomcat/apache-tomcat-8.5.39/webapps";
+            File videoAddress = new File(fileDir + "/HLS-demo/m3u8/Gear" + id);
+
+            String[] files = videoAddress.list();
+            for (String fileName : files) {
+                File deleteTs = new File(videoAddress.getAbsolutePath(), fileName);
+                try {
+                    Files.deleteIfExists(deleteTs.toPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }*/
     }
 
-    @GetMapping("/camera/{id}/setup")
-    public void setupCameraById(HttpServletRequest request, @PathVariable Integer id, HttpSession session) {
-        //CameraService cameraService = AppBeans.get(CameraService.NAME);
-        //DataManager dataManager = AppBeans.get(DataManager.NAME);
+    @GetMapping("/camera/{cameraNumber}/setup")
+    public synchronized Integer setupCameraById(@PathVariable String cameraNumber) {
 
+        //cuba是通过点击，所以MidleCount.add是可用的，实际环境是通过链接直接访问，所以下面代码是来使MidleCount.add有效
+        Configuration configurations = AppBeans.get(Configuration.class);
+        WebAuthConfig webAuthConfigs = configurations.getConfig(WebAuthConfig.class);
+        LoginService loginServices = AppBeans.get(LoginService.class);
+        UserSession userSessions = loginServices.getSystemSession(webAuthConfigs.getTrustedClientPassword());
+        try {
+            AppContext.setSecurityContext(new SecurityContext(userSessions));
+            Camera camera = cameraService.getCameraByNumber(cameraNumber);
+            int id = camera.getCameraId();
+            int num = 0;
+            MidleCount.add(id,num);
+        } finally {
+            AppContext.setSecurityContext(null);
+        }
 
+        int count = 0 ;
         GetSyncPipe getSyncPipe = new GetSyncPipe();
         Map<Integer, Object> map = new HashMap<>();
         String fileDir = "F:/testcamera/deploy/tomcat/webapps";
-        File videoAddress = new File(fileDir + "/HLS-demo/m3u8/Gear" + id);
+        //String fileDir = "C:/Program Files/Tomcat/apache-tomcat-8.5.39/webapps";
+        File videoAddress = new File(fileDir + "/HLS-demo/m3u8/Gear" + cameraNumber);
 
         if (!videoAddress.exists()) {
             videoAddress.mkdir();
         }
-
-        /*String[] files = videoAddress.list();
-        for (String fileName : files) {
-            File deleteTs = new File(videoAddress.getAbsolutePath(), fileName);
-            try {
-                Files.deleteIfExists(deleteTs.toPath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }*/
-        File file = new File(videoAddress.getAbsolutePath());
-        File[] listFiles = file.listFiles();
-        if(listFiles.length < 1) {
-
-       /*Camera camera = (Camera) dataManager.loadList(LoadContext.create(Camera.class).setQuery(
-                LoadContext.createQuery("select e from testcamera_Camera e where e.cameraId like :id")
-                        .setParameter("id", "a%")
-                        .setMaxResults(10))
-                .setView("_local"));*/
-            //dataManager.load(Camera.class).query("select e from testcamera_Camera e where e.cameraId like :id").view("_local");
+        //File file = new File(videoAddress.getAbsolutePath());
+        //File[] listFiles = file.listFiles();
+        //if (listFiles.length < 1) {
+        if(ffpegStatus == false){
+            count = count + 1;
 
             Configuration configuration = AppBeans.get(Configuration.class);
             WebAuthConfig webAuthConfig = configuration.getConfig(WebAuthConfig.class);
@@ -107,12 +181,29 @@ public class CameraBrowseController {
             UserSession userSession = loginService.getSystemSession(webAuthConfig.getTrustedClientPassword());
             try {
                 AppContext.setSecurityContext(new SecurityContext(userSession));
-                // call middleware services here
-                Camera camera = cameraService.getCameraById(id);
+                //Camera camera = cameraService.getCameraById(id);
+                Camera camera = cameraService.getCameraByNumber(cameraNumber);
 
                 String account = camera.getAccount();
                 String password = camera.getPassword();
                 String address = camera.getCameraAddress();
+                int id = camera.getCameraId();
+
+                //String dir = "http://localhost:8080/HLS-demo/master.html?cameraId=";
+                //String dir = "http://localhost:8080/HLS-demo/master.html?cameranumber=";
+
+                //String dir = "http://10.200.0.106:8080/HLS-demo/index.html?cameranumber=";
+                String dir = "http://localhost:8080/HLS-demo/index.html?cameranumber=";
+
+                //String dir = "http://localhost:8888/HLS-demo/index.html?cameranumber=";
+                //String dir = "http://localhost:8888/HLS-demo/master.html?cameraId=";
+                //File video = new File(dir + id);
+                File video = new File(dir + cameraNumber);
+
+                String videoadd = video.getPath();
+                //String videoass = camera.setVideoAddress(videoadd);
+                cameraService.updateCameraById(id,videoadd);
+                //cameraService.updateCameraByNumber(cameranumber,videoadd);
 
                 StringBuffer buffer = new StringBuffer();
                 buffer.append("rtsp://");
@@ -151,6 +242,7 @@ public class CameraBrowseController {
                 for (Map.Entry<Integer, Object> entry : map.entrySet()) {
                     MidleMap.getHashMap(entry.getKey(), entry.getValue());
                 }
+                ffpegStatus = true;
                 syncPipe.start();
                 getSyncPipe.setSyncPipe(syncPipe);
 
@@ -159,6 +251,7 @@ public class CameraBrowseController {
             }
 
         }
+        return count;
 
 
     }

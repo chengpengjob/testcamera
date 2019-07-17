@@ -40,5 +40,57 @@ public class CameraServiceBean implements CameraService {
         return null;
     }
 
+    public  Camera updateCameraById(Integer cameraId,String videoAddress){
+        Camera cameraById = getCameraById(cameraId);
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+            cameraById.setVideoAddress(videoAddress);
+            em.merge(cameraById);
+            // query.setView(Space.class, "space-view");
+            //Camera camera = (Camera) query.getFirstResult();
+            tx.commit();
+            //return camera;
+        } catch (Exception e) {
+            //log.error(e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
+    public Camera getCameraByNumber(String cameraNumber){
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+            Query query = em.createQuery("select e from testcamera_Camera e where e.cameraNumber=:cameraNumber");
+            query.setParameter("cameraNumber", cameraNumber);
+            // query.setView(Space.class, "space-view");
+            Camera camera = (Camera) query.getFirstResult();
+            tx.commit();
+            return camera;
+        } catch (Exception e) {
+            //log.error(e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public  Camera updateCameraByNumber(String cameraNumber,String videoAddress){
+        Camera cameraByNumber = getCameraByNumber(cameraNumber);
+        try (Transaction tx = persistence.createTransaction()) {
+            EntityManager em = persistence.getEntityManager();
+            cameraByNumber.setVideoAddress(videoAddress);
+            em.merge(cameraByNumber);
+            // query.setView(Space.class, "space-view");
+            //Camera camera = (Camera) query.getFirstResult();
+            tx.commit();
+            //return camera;
+        } catch (Exception e) {
+            //log.error(e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+
 }
 

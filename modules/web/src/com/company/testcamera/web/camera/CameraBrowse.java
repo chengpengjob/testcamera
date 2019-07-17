@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.sys.SecurityContext;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.GroupDatasource;
+import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.web.App;
 import com.haulmont.cuba.web.sys.WebScreens;
 import com.vaadin.event.ContextClickEvent;
@@ -43,8 +44,9 @@ public class CameraBrowse extends AbstractLookup {
 
     GetSyncPipe getSyncPipe = new GetSyncPipe();
 
-    int count = 0;
-
+    //int count = 0;
+    //final Integer[] cameraId = {1};
+    final String[] cameraNumber = {"1"};
 
     @Override
     protected void init(InitEvent initEvent) {
@@ -52,152 +54,31 @@ public class CameraBrowse extends AbstractLookup {
         Map<Integer, Object> map = new HashMap<>();
 
         super.init(initEvent);
-        final Integer[] cameraId = {1};
         camerasTable.addSelectionListener(e -> {
             if (e == null) return;
             Camera singleSelected = camerasTable.getSingleSelected();
-            cameraId[0] = singleSelected.getCameraId();
-            watchBtn.addClickListener(ex ->{
-                App app = App.getInstance();
-                WebScreens windowManager = app.getWindowManager();
-                windowManager.showWebPage("http://localhost:8080/HLS-demo/index.html?id=" + cameraId[0]+"",null);
-                MidleCount.add(cameraId[0], count);
-            });
-
-
+            //cameraId[0] = singleSelected.getCameraId();
+            cameraNumber[0] = singleSelected.getCameraNumber();
             //watchBtn.setUrl(");
             //watchBtn.setUrl("http://localhost:8888/HLS-demo/master.html" + "?id=" + cameraId);
         });
-        //Map<Integer, Object> map = new HashMap<>();
 
 
-       /* BaseAction view = new BaseAction("viewAction") {
-            @Override
-            public void actionPerform(Component component) {
+    }
+    @Subscribe("watchBtn")
+    private void onWatchBtnClick(Button.ClickEvent event) {
+        App app = App.getInstance();
+        WebScreens windowManager = app.getWindowManager();
 
-                Camera singleSelected = camerasTable.getSingleSelected();
-                String account = singleSelected.getAccount();
-                String password = singleSelected.getPassword();
-                String address = singleSelected.getCameraAddress();
-                Integer id = singleSelected.getCameraId();
+        //windowManager.showWebPage("http://10.200.0.106:8080/HLS-demo/index.html?number=" + cameraNumber[0]+"",null);
+        windowManager.showWebPage("http://localhost:8080/HLS-demo/index.html?number=" + cameraNumber[0]+"",null);
 
-                String fileDir = "F:/testcamera/deploy/tomcat/webapps";
-                //String fileDir = "C:/Program Files/Tomcat/apache-tomcat-8.5.39/webapps";
-                File videoAddress = new File(fileDir + "/HLS-demo/m3u8/Gear" + id);
+        //windowManager.showWebPage("http://localhost:8888/HLS-demo/index.html?number=" + cameraNumber[0]+"",null);
+        //windowManager.showWebPage("http://localhost:8080/HLS-demo/index.html?id=" + cameraId[0]+"",null);
+        //windowManager.showWebPage("http://localhost:8888/HLS-demo/index.html?id=" + cameraId[0]+"",null);
+        //MidleCount.add(cameraId[0], count);
 
-                if (!videoAddress.exists()) {
-                    videoAddress.mkdirs();
-                }
-
-                String[] files = videoAddress.list();
-                for (String fileName : files) {
-                    File deleteTs = new File(videoAddress.getAbsolutePath(), fileName);
-                    try {
-                        Files.deleteIfExists(deleteTs.toPath());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                String vaddress = videoAddress.getAbsolutePath();
-                singleSelected.setVideoAddress(vaddress);
-                dataManager.commit(singleSelected);
-                camerasTable.refresh();
-
-                StringBuffer buffer = new StringBuffer();
-                buffer.append("rtsp://");
-                buffer.append(account);
-                buffer.append(":");
-                buffer.append(password);
-                buffer.append("@");
-                buffer.append(address);
-
-                List<String> list = new ArrayList<>();
-                list.add("ffmpeg");
-                list.add("-i");
-                list.add(buffer.toString());
-                list.add("-c:v");
-                list.add("copy");
-                list.add("-an");
-                list.add("-ss");
-                list.add("1");
-                list.add("-map");
-                list.add("0");
-                list.add("-f");
-                list.add("hls");
-                list.add("-hls_flags");
-                list.add("delete_segments+omit_endlist");
-                list.add("-hls_allow_cache");
-                list.add("0");
-                list.add("-hls_segment_filename");
-                list.add("output%03d.ts");
-                list.add("playlist.m3u8");
-
-                SyncPipe syncPipe = new SyncPipe(list, videoAddress);
-
-                map.put(id, syncPipe);
-                //把对应线程根据cameraid存到midlemap中
-                for (Map.Entry<Integer, Object> entry : map.entrySet()) {
-                    MidleMap.getHashMap(entry.getKey(), entry.getValue());
-                }
-
-
-                syncPipe.start();
-                getSyncPipe.setSyncPipe(syncPipe);
-            }
-
-            @Override
-            protected boolean isPermitted() {
-                Camera singleSelected = camerasTable.getSingleSelected();
-                return singleSelected == null ? false : true;
-            }
-        };
-        viewBtn.setAction(view);
-        camerasTable.addAction(view);*/
-
-       /*BaseAction watch = new BaseAction("watchAction") {
-
-            @Override
-            public void actionPerform(Component component) {
-            }
-
-            @Override
-            protected boolean isPermitted() {
-                Camera singleSelected = camerasTable.getSingleSelected();
-                return singleSelected == null ? false : true;
-            }
-        };
-        camerasTable.addAction(watch);*/
-
-       /* BaseAction close = new BaseAction("closeAction") {
-            @Override
-            public void actionPerform(Component component) {
-                Camera singleSelected = camerasTable.getSingleSelected();
-                String voaddress = singleSelected.getVideoAddress();
-
-                if ((SyncPipe) map.get(singleSelected.getCameraId()) == null && voaddress == null) {
-                    showMessageDialog("Warning", "请先生成地址！", MessageType.WARNING.modal(true).closeOnClickOutside(true));
-
-                } else {
-                    singleSelected.setVideoAddress(null);
-                    dataManager.commit(singleSelected);
-                    camerasTable.refresh();
-
-
-                    StopProcess s = new StopProcess((SyncPipe) map.get(singleSelected.getCameraId()));
-                    s.start();
-                    getSyncPipe.setSyncPipeNull();
-                }
-            }
-
-            @Override
-            protected boolean isPermitted() {
-                Camera singleSelected = camerasTable.getSingleSelected();
-                return singleSelected == null ? false : true;
-            }
-        };
-        closeBtn.setAction(close);
-        camerasTable.addAction(close);*/
+        camerasDs.refresh();
 
     }
 
@@ -239,20 +120,4 @@ public class CameraBrowse extends AbstractLookup {
             syncPipe.start();
         }
     }
-
-    /*class GetSyncPipe {
-        public SyncPipe syncPipe = null;
-
-        public SyncPipe getSyncPipe() {
-            return syncPipe;
-        }
-
-        public void setSyncPipe(SyncPipe syncPipe) {
-            this.syncPipe = syncPipe;
-        }
-
-        public void setSyncPipeNull() {
-            this.syncPipe = null;
-        }
-    }*/
 }
